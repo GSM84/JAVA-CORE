@@ -9,9 +9,9 @@ public class Main {
         t.initArray();
         t.singleTheread(t.arr);
         t.initArray();
-        t.multiThread(t.arr, 10);
+        t.multiThread(t.arr, 5);
         t.initArray();
-        t.multiThreadV2(t.arr, 10);
+        t.multiThreadV2(t.arr, 5);
     }
 
     void initArray(){
@@ -41,7 +41,7 @@ public class Main {
                 grpSize = size - startPosition;
             float[] temp = new float[grpSize];
             System.arraycopy(_arr, startPosition, temp, 0, grpSize);
-            ParallelThread t = new ParallelThread(temp, "Thread_"+i);
+            ParallelThread t = new ParallelThread(temp, "Thread_"+i, startPosition);
             threads[i] = t;
             t.start();
 
@@ -78,7 +78,6 @@ public class Main {
                 e.printStackTrace();
             }
         }
-
         arr = processResult(threads, size);
 
         System.out.println("Multithread job was done in: "+ (System.currentTimeMillis() - start) + " miliseconds.");

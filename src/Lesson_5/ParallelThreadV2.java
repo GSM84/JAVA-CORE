@@ -30,7 +30,8 @@ public class ParallelThreadV2 extends Thread{
 
         dest = Arrays.copyOfRange(source, startPos, endPos);
         for (int i = 0; i < dest.length; i++) {
-            this.dest[i] = (float)(dest[i] * Math.sin(0.2f + i / 5) * Math.cos(0.2f + i / 5) * Math.cos(0.4f + i / 2));
+            this.dest[i] = (float)(dest[i] * Math.sin(0.2f + startPos / 5) * Math.cos(0.2f + startPos / 5) * Math.cos(0.4f + startPos / 2));
+            startPos++;
         }
         System.out.println(this.name + " v2 finished.");
     }
