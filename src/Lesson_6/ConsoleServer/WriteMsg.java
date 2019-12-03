@@ -22,7 +22,6 @@ public class WriteMsg extends Thread{
             try {
                 msg = in.readLine();
                 if (msg.toLowerCase().equals("/end")) {
-                    //out.writeUTF("stoped");
                     break;
                 } else if(msg.toLowerCase().equals("/send")){
                     out.flush();
