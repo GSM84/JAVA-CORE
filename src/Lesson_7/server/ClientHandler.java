@@ -4,6 +4,8 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ClientHandler {
     private Socket socket;
@@ -11,6 +13,8 @@ public class ClientHandler {
     DataOutputStream out;
     MainServ serv;
     String nick;
+    Pattern pattern = Pattern.compile("^/w\\s[A-Za-z0-9_]+\\s");
+    Matcher matcher;
 
     public ClientHandler(MainServ serv, Socket socket){
         try {
@@ -28,11 +32,13 @@ public class ClientHandler {
                             if (msg.startsWith("/auth")) {
                                 String[] tokens = msg.split(" ");
                                 String newNick = AuthService.getNickByLoginAndPass(tokens[1], tokens[2]);
-                                if (newNick != null) {
+                                if (newNick != null && !serv.getClienList().containsKey(newNick)) {
                                     sendMsg("/authok");
                                     nick = newNick;
                                     serv.subscribe(ClientHandler.this);
                                     break;
+                                } else if(newNick != null && serv.getClienList().containsKey(newNick)){
+                                    sendMsg("Пользователь с таким\n ником уже авторизовался!");
                                 }
                                 else {
                                     sendMsg("Неверный логин/пароль");
@@ -40,14 +46,28 @@ public class ClientHandler {
                             }
                         }
 
-
                         while (true) {
                             String msg = in.readUTF();
                             if (msg.equals("/end")) {
                                 out.writeUTF("/serverClosed");
                                 break;
+                            }else if(msg.matches("^/w\\s[A-Za-z0-9_]+\\s.+")){
+                                matcher = pattern.matcher(msg);
+                                String msgRecipient = null;
+                                String msgText      = null;
+
+                                while(matcher.find()){
+                                    msgRecipient = msg.substring(3, matcher.end()-1);
+                                    msgText      = msg.substring(matcher.end(), msg.length());
+                                }
+                                if (serv.getClienList().containsKey(msgRecipient)){
+                                    serv.sendPrivateMsg(msgRecipient, nick + "/w " + msgText);
+                                }else{
+                                    out.writeUTF("Пользователя с таким ником\n не существует.");
+                                }
+                            }else {
+                                serv.broadcastMsg(nick + " " + msg);
                             }
-                            serv.broadcastMsg(nick + " " + msg);
                         }
 
                     } catch (IOException e) {

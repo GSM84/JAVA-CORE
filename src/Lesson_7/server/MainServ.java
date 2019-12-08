@@ -3,13 +3,14 @@ package Lesson_7.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.Vector;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainServ {
-    private Vector<ClientHandler> clients;
+    private HashMap<String, ClientHandler> clients;
 
     public MainServ() {
-        clients = new Vector<>();
+        clients = new HashMap<>();
         ServerSocket server = null;
         Socket socket = null;
         try {
@@ -41,16 +42,26 @@ public class MainServ {
     }
 
     public void broadcastMsg(String msg) {
-        for (ClientHandler o: clients) {
-            o.sendMsg(msg);
+        for (Map.Entry<String, ClientHandler> o: clients.entrySet()) {
+            o.getValue().sendMsg(msg);
         }
     }
 
+    public void sendPrivateMsg(String _nick, String _msg){
+
+        clients.get(_nick).sendMsg(_msg);
+    }
+
     public void subscribe(ClientHandler client) {
-        clients.add(client);
+
+        clients.put(client.nick, client);
     }
 
     public void unsubscribe(ClientHandler client) {
-        clients.remove(client);
+        clients.remove(client.nick);
+    }
+
+    public HashMap getClienList(){
+        return clients;
     }
 }
