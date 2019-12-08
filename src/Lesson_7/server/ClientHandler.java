@@ -61,7 +61,7 @@ public class ClientHandler {
                                     msgText      = msg.substring(matcher.end(), msg.length());
                                 }
                                 if (serv.getClienList().containsKey(msgRecipient)){
-                                    serv.sendPrivateMsg(msgRecipient, nick + "/w " + msgText);
+                                    serv.sendPrivateMsg(msgRecipient, ClientHandler.this.nick, msgText);
                                 }else{
                                     out.writeUTF("Пользователя с таким ником\n не существует.");
                                 }

@@ -47,9 +47,9 @@ public class MainServ {
         }
     }
 
-    public void sendPrivateMsg(String _nick, String _msg){
+    public void sendPrivateMsg(String _msgRecipient,String _msgSender, String _msg){
 
-        clients.get(_nick).sendMsg(_msg);
+        clients.get(_msgRecipient).sendMsg(_msgSender + " whisper: " + _msg);
     }
 
     public void subscribe(ClientHandler client) {
