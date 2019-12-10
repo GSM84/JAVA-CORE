@@ -40,13 +40,13 @@ public class Server {
 
     public void sendPersonalMsg(ClientHandler from, String nickTo, String msg) {
         for (ClientHandler o : clients) {
-            if (o.getNick().equals(nickTo)) {
+            if (o.getNick().equals(nickTo) && !o.checkBlackList(from.getNick())) {
                 o.sendMsg("from " + from.getNick() + ": " + msg);
                 from.sendMsg("to " + nickTo + ": " + msg);
                 return;
             }
         }
-        from.sendMsg("Клиент с ником " + nickTo + " не найден в чате");
+        from.sendMsg("Клиент с ником " + nickTo + " добавил вас в черный список.");
     }
 
     public void broadcastMsg(ClientHandler from, String msg) {
@@ -68,14 +68,22 @@ public class Server {
 
     public void broadcastClientsList() {
         StringBuilder sb = new StringBuilder();
-        sb.append("/clientslist ");
         for (ClientHandler o : clients) {
-            sb.append(o.getNick() + " ");
-        }
-        String out = sb.toString();
-        for (ClientHandler o : clients) {
+            sb.append("/clientslist ");
+            for (ClientHandler cl : clients) {
+                if (cl.getNick().equals(o.getNick()))
+                    sb.append(cl.getNick() + "-I ");
+                else if (o.checkBlackList(cl.getNick()))
+                    sb.append(cl.getNick() + "-Blocked ");
+                else
+                    sb.append(cl.getNick() + " ");
+
+            }
+            String out = sb.toString();
             o.sendMsg(out);
+            sb.setLength(0);
         }
+
     }
 
     public void subscribe(ClientHandler client) {

@@ -1,14 +1,11 @@
 package Lesson_8.client;
 
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 
 public class PersonalController {
     @FXML
