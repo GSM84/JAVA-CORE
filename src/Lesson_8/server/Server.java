@@ -46,7 +46,7 @@ public class Server {
                 return;
             }
         }
-        from.sendMsg("Клиент с ником " + nickTo + " не найден в чате");
+        from.sendMsg("Клиент с ником " + nickTo + " добавил вас в черный список.");
     }
 
     public void broadcastMsg(ClientHandler from, String msg) {

@@ -62,15 +62,27 @@ public class ClientHandler {
                                 out.writeUTF("/serverclosed");
                                 break;
                             }
-                            if (str.startsWith("/w ")) { // /w nick3 lsdfhldf sdkfjhsdf wkerhwr
+                            else if (str.startsWith("/w ")) { // /w nick3 lsdfhldf sdkfjhsdf wkerhwr
                                 String[] tokens = str.split(" ", 3);
                                 String m = str.substring(tokens[1].length() + 4);
                                 server.sendPersonalMsg(this, tokens[1], tokens[2]);
                             }
-                            if (str.startsWith("/blacklist ")) { // /blacklist nick3
+                            else if (str.startsWith("/blacklist ")) { // /blacklist nick3
                                 String[] tokens = str.split(" ");
-                                addToBlacklist(this.id, tokens[1]);
-                                sendMsg("Вы добавили пользователя " + tokens[1] + " в черный список");
+                                if(this.nick.equals(tokens[1]))
+                                    sendMsg("Нельзя заблокировать самого себя.");
+                                else {
+                                    addToBlacklist(this.id, tokens[1]);
+                                    sendMsg("Вы добавили пользователя " + tokens[1] + " в черный список");
+                                }
+                            }else if(str.startsWith("/unblock ")){
+                                String[] tokens = str.split(" ");
+                                if(checkBlackList(tokens[1])){
+                                    unblockUser(this.id, tokens[1]);
+                                    sendMsg("Пользователь "+ tokens[1] + " был удален из черного списка.");
+                                }else
+                                    sendMsg("Пользователь "+ tokens[1] + " отсутствует в черном списке.");
+
                             }
                         } else {
                             server.broadcastMsg(this, nick + ": " + str);
@@ -117,9 +129,13 @@ public class ClientHandler {
 
     public void addToBlacklist(int _id, String _blockedUser){
         blackList.add(_blockedUser);
-        //put record into table
         AuthService.putNickToBlackList(_id, _blockedUser);
         server.broadcastClientsList();
+    }
 
+    public void unblockUser(int _id, String _unblockedUser){
+        blackList.remove(_unblockedUser);
+        AuthService.removeFromBlackList(_id, _unblockedUser);
+        server.broadcastClientsList();
     }
 }

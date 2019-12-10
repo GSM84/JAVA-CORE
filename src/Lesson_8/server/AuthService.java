@@ -60,11 +60,7 @@ public class AuthService {
 
     public static void putNickToBlackList(int _id, String _blockedUser){
         try {
-            ResultSet rs      = stmt.executeQuery("select id from users where nickname = '" + _blockedUser + "'");
-            int blockedUserId = -1;
-            if(rs.next()){
-                blockedUserId = rs.getInt("id");
-            }
+            int blockedUserId = defineIdByNick(_blockedUser);
             String query = "insert into black_list  VALUES (?, ?);";
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, _id);
@@ -73,6 +69,41 @@ public class AuthService {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    public static void removeFromBlackList(int _id, String _unblockedUser){
+        try {
+            int unblockedUserId = defineIdByNick(_unblockedUser);
+            System.out.println(_id);
+            System.out.println(unblockedUserId);
+            String query = "delete " +
+                           "from black_list " +
+                           "where user_id = ? " +
+                           "and blocked_user_id = ?";
+            PreparedStatement ps = connection.prepareStatement(query);
+            ps.setInt(1, _id);
+            ps.setInt(2, unblockedUserId);
+            //ps.executeUpdate();
+            ps.execute();
+            ps.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static int defineIdByNick(String _nickName){
+        ResultSet rs      = null;
+        try {
+            rs = stmt.executeQuery("select id from users where nickname = '" + _nickName + "'");
+            int blockedUserId = -1;
+            if(rs.next()){
+                blockedUserId = rs.getInt("id");
+            }
+            return blockedUserId;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     public static HashSet<String> loadBlacklist(int _userId) {
