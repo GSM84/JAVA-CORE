@@ -4,6 +4,7 @@ import javafx.util.Pair;
 
 import java.sql.*;
 import java.util.HashSet;
+import java.util.logging.Level;
 
 public class AuthService {
     private static Connection connection;
@@ -12,10 +13,11 @@ public class AuthService {
     public static void connect() {
         try {
             Class.forName("org.sqlite.JDBC");
-            connection = DriverManager.getConnection("jdbc:sqlite:users.db");
+            connection = DriverManager.getConnection("jdbc:sqlite:main.db");
             stmt = connection.createStatement();
         } catch (Exception e) {
             e.printStackTrace();
+            Server.getLogger().log(Level.SEVERE, "Ошибка соединения с БД.");
         }
     }
 
@@ -27,15 +29,17 @@ public class AuthService {
             ps.setInt(2, pass.hashCode());
             ps.setString(3, nick);
             ps.executeUpdate();
+            Server.getLogger().log(Level.INFO, "Пользователь "+ login + " успешно добавлен.");
         } catch (SQLException e) {
             e.printStackTrace();
+            Server.getLogger().log(Level.SEVERE, "Ошибка добавления пользователя.");
         }
     }
 
     public static Pair<Integer, String> getNickByLoginAndPass(String login, String pass) {
         try {
             ResultSet rs = stmt.executeQuery("select id, nickname, password from users where login = '" + login + "'");
-            int myHash = pass.hashCode(); // 137
+            int myHash = pass.hashCode();
             if (rs.next()) {
                 String nick = rs.getString("nickname");
                 int dbHash  = rs.getInt("password");
@@ -66,6 +70,7 @@ public class AuthService {
             ps.setInt(1, _id);
             ps.setInt(2, blockedUserId);
             ps.executeUpdate();
+            Server.getLogger().log(Level.INFO,"Пользователь " + _blockedUser + " добавлен в черный список. Инициатор "+ _id);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -83,9 +88,9 @@ public class AuthService {
             PreparedStatement ps = connection.prepareStatement(query);
             ps.setInt(1, _id);
             ps.setInt(2, unblockedUserId);
-            //ps.executeUpdate();
             ps.execute();
             ps.close();
+            Server.getLogger().log(Level.INFO, "Пользователь "+ _unblockedUser + " удален из черного списка. Инициатор " + _id);
         } catch (SQLException e) {
             e.printStackTrace();
         }

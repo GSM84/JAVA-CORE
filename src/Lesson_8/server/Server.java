@@ -4,33 +4,45 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Vector;
+import java.util.logging.*;
 
 public class Server {
     private Vector<ClientHandler> clients;
+    private static final Logger logger = Logger.getLogger(Lesson_8.server.Server.class.getName());
+    private Handler handler;
 
     public Server() {
         clients = new Vector<>();
         ServerSocket server = null;
         Socket socket = null;
+
         try {
+            handler = new FileHandler("mylog.log", true);
+            handler.setFormatter(new SimpleFormatter());
+            logger.addHandler(handler);
+
             AuthService.connect();
             server = new ServerSocket(2020);
-            System.out.println("Сервер запущен. Ожидаем клиентов...");
+            logger.log(Level.INFO, "Сервер запущен. Ожидаем клиентов...");
+
             while (true) {
                 socket = server.accept();
-                System.out.println("Клиент подключился");
+                logger.log(Level.INFO, "Клиент подключился");
                 new ClientHandler(this, socket);
             }
         } catch (IOException e) {
             e.printStackTrace();
+            logger.log(Level.SEVERE, "Произошла ошибка");
         } finally {
             try {
                 socket.close();
+                logger.log(Level.INFO, "Сокет закрыт");
             } catch (IOException e) {
                 e.printStackTrace();
             }
             try {
                 server.close();
+                logger.log(Level.INFO, "Сервер закрыт");
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -83,7 +95,6 @@ public class Server {
             o.sendMsg(out);
             sb.setLength(0);
         }
-
     }
 
     public void subscribe(ClientHandler client) {
@@ -94,5 +105,9 @@ public class Server {
     public void unsubscribe(ClientHandler client) {
         clients.remove(client);
         broadcastClientsList();
+    }
+
+    public static Logger getLogger() {
+        return logger;
     }
 }
